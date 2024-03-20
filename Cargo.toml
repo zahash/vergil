@@ -8,3 +8,6 @@ license = "MIT"
 repository = "https://github.com/zahash/vergil"
 
 [dependencies]
+clap = { version = "4", features = ["derive"] }
+num-bigint = { version = "0.4" }
+num-traits = { version = "0.2" }
