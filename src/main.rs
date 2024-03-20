@@ -34,7 +34,7 @@ fn parse(s: &str) -> Result<BigUint, CliError> {
     match s.get(0..2) {
         Some("0x") => <BigUint as Num>::from_str_radix(&s[2..], 16).map_err(invalid_num),
         Some("0b") => <BigUint as Num>::from_str_radix(&s[2..], 2).map_err(invalid_num),
-        _ => <BigUint as Num>::from_str_radix(&s, 2).map_err(invalid_num),
+        _ => <BigUint as Num>::from_str_radix(&s, 10).map_err(invalid_num),
     }
 }
 
