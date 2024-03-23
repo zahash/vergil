@@ -22,6 +22,12 @@ enum Cli {
     },
     Loc {
         path: PathBuf,
+
+        #[arg(short, long)]
+        exclude: Vec<PathBuf>,
+
+        #[arg(long = "allow-hidden")]
+        allow_hidden: bool,
     },
 }
 
@@ -31,19 +37,28 @@ impl Cli {
             Cli::Hex { input } => println!("{:X}", input),
             Cli::Bin { input } => println!("{:b}", input),
             Cli::Dec { input } => println!("{}", input),
-            Cli::Loc { path } => {
+            Cli::Loc {
+                path,
+                exclude,
+                allow_hidden,
+            } => {
                 match path.is_file() {
                     true => println!("{}\t :: {:?}", loc(&std::fs::read_to_string(&path)?), path),
                     false => {
                         for entry in WalkDir::new(path)
                             .into_iter()
                             .filter_entry(|entry| {
-                                entry
+                                let excluded =
+                                    exclude.iter().any(|ex| entry.path().starts_with(ex));
+
+                                let hidden = entry
                                     .file_name()
                                     .as_encoded_bytes()
                                     .first()
-                                    .map(|byte| *byte != 0x2E) // ascii value of dot (.)
-                                    .unwrap_or(false)
+                                    .map(|byte| *byte == 0x2E) // ascii value of dot (.)
+                                    .unwrap_or(false);
+
+                                !excluded && (allow_hidden || !hidden)
                             })
                             .filter_map(|e| e.ok())
                             .filter(|entry| entry.path().is_file())
