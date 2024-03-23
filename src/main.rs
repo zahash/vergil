@@ -48,11 +48,10 @@ impl Cli {
                             .filter_map(|e| e.ok())
                             .filter(|entry| entry.path().is_file())
                         {
-                            println!(
-                                "{}\t :: {:?}",
-                                loc(&std::fs::read_to_string(entry.path())?),
-                                entry.path(),
-                            );
+                            // can only read UTF-8 text files (fails for binaries)
+                            if let Ok(content) = std::fs::read_to_string(entry.path()) {
+                                println!("{}\t :: {:?}", loc(&content), entry.path());
+                            }
                         }
                     }
                 }
